@@ -35,7 +35,7 @@ public class mylinker {
 		System.out.println("Symbol Table");
 		for (Map.Entry<String, Integer> entry : symbolTable.entrySet()) {
 			if (symboltableerror.containsKey(entry.getKey())) {
-				System.out.printf("%s=%d %s\n", entry.getKey(), entry.getValue(), symboltableerror.get(entry.getKey()));
+				System.out.printf("%s=%d   %s", entry.getKey(), entry.getValue(), symboltableerror.get(entry.getKey()));
 			} else {
 				System.out.printf("%s=%d\n", entry.getKey(), entry.getValue());
 			}
@@ -64,17 +64,14 @@ public class mylinker {
 		List<String> warninglist = new LinkedList<String>();
 		List<Pair> uselist = new LinkedList<Pair>();
 		List<Pair> addrlist = new LinkedList<Pair>();
-		int memorymapindex = 0; // for final recording of memory map.
 		int countofmodule = 0;
-		// int numofmodule=0;
 		// count the lines it should have if the input is strucuted:
-		// def/use/addr
 		int totalspace = 0; // count the total number of addresses pairs we have
 		// first pass, handle multiple definition, calculate relative address,
 		// map symbols
 
 		// 改输入方式！！！！
-		String input = "/Users/senongtor/Documents/NYU_CS/OS/Lab1/input3.txt";
+		String input = "/Users/senongtor/Documents/NYU_CS/OS/Lab1/input6.txt";
 		Scanner reader = new Scanner(new FileInputStream(input));
 
 		while (reader.hasNext()) {
@@ -123,7 +120,7 @@ public class mylinker {
 
 			for (int i = 0; i < modulesymbolpair.size(); i++) {
 				Pair defpairinmodule = modulesymbolpair.get(i);
-				if (defpairinmodule.getSecond() > addrsize) {
+				if (defpairinmodule.getSecond() > addrsize - 1) {
 					String s = String.format("Error: The value of %s is outside module %d; zero (relative) used.\n",
 							defpairinmodule.getFirst(), defmodulemap.get(defpairinmodule.getFirst()));
 					symboltableerror.put(defpairinmodule.getFirst(), s);
@@ -148,13 +145,12 @@ public class mylinker {
 		}
 		// Second pass must check if a use of addr is defined, if a add is used
 		// not defined,
-		// If an address appearing in a use list exceeds the size of the module.
 		// If an address on a use list is not type E, print an error message and
 		// treat the address as type E. If a type E address is not on a use
-		// list, print an error message and treat the address as type I
+		// list,
+		// print an error message and treat the address as type I
 		totalspace = 0;
 		Scanner reader2 = new Scanner(new FileInputStream(input));
-		String errormsg = "";
 		while (reader2.hasNext()) {
 			ArrayList<Pair> uselist2 = new ArrayList<Pair>();
 			ArrayList<Pair> addr = new ArrayList<Pair>();
@@ -166,8 +162,8 @@ public class mylinker {
 			defsize = Integer.parseInt(reader2.next());
 			int defsizeloop = defsize;
 			while (defsizeloop > 0) {
-				String symbol = reader2.next();
-				String val = reader2.next();
+				String skip = reader2.next();
+				skip = reader2.next();
 				defsizeloop--;
 			}
 			// Use line
@@ -199,12 +195,13 @@ public class mylinker {
 			for (int i = 0; i < uselist2.size(); i++) {
 				Pair currpair = uselist2.get(i);
 				int init = currpair.getSecond();
-				// handle use address exceeding the size of addr list
+
+				// handle use address exceeding the size of addr list!!!!!!!!!
 
 				int absval = 0;
 				if (!symbolTable.containsKey(currpair.getFirst())) {
 					for (int k = 0; k < addrsize; k++) {
-						String s = String.format("   Error: %s is not defined; zero used.", currpair.getFirst());
+						String s = String.format(" Error: %s is not defined; zero used.", currpair.getFirst());
 						absval = 0;
 						addrerrormsg[k] = s;
 					}
@@ -213,27 +210,27 @@ public class mylinker {
 					absval = symbolTable.get(currpair.getFirst());
 				}
 				int nextindex = addr.get(init).getSecond() % 1000;
-				if (nextindex >= addrsize &&nextindex!=777) {
-					addrerrormsg[init] = "   Error: Pointer in use chain exceeds module size; chain terminated.";
+				if (nextindex >= addrsize && nextindex != 777) {
+					addrerrormsg[init] = " Error: Pointer in use chain exceeds module size; chain terminated.";
 					addr.set(init, new Pair("Finished", (addr.get(init).getSecond() / 1000) * 1000 + absval));
 					break;
 				}
 				if (!addr.get(init).getFirst().equals("E")) {
-					String s = String.format("   Error: %s type address on use chain; treated as E type.",
+					String s = String.format(" Error: %s type address on use chain; treated as E type.",
 							addr.get(init).getFirst());
 					addrerrormsg[init] = s;
 				}
 				addr.set(init, new Pair("Finished", (addr.get(init).getSecond() / 1000) * 1000 + absval));
 				while (nextindex != 777) {
 					int nextnextindex = addr.get(nextindex).getSecond() % 1000;
-					if (nextnextindex >= addrsize&&nextnextindex!=777) {
-						addrerrormsg[nextindex] = "   Error: Pointer in use chain exceeds module size; chain terminated.";
+					if (nextnextindex >= addrsize && nextnextindex != 777) {
+						addrerrormsg[nextindex] = " Error: Pointer in use chain exceeds module size; chain terminated.";
 						addr.set(nextindex,
 								new Pair("Finished", (addr.get(nextindex).getSecond() / 1000) * 1000 + absval));
 						break;
 					}
 					if (!addr.get(nextindex).getFirst().equals("E")) {
-						String s = String.format("   Error: %s type address on use chain; treated as E type.",
+						String s = String.format(" Error: %s type address on use chain; treated as E type.",
 								addr.get(nextindex).getFirst());
 						addrerrormsg[nextindex] = s;
 					}
@@ -251,7 +248,7 @@ public class mylinker {
 				}
 				if (addr.get(i).getFirst().equals("E")) {
 					addr.set(i, new Pair("I", addr.get(i).getSecond()));
-					addrerrormsg[i] = "   Error: E type address not on use chain; treated as I type.";
+					addrerrormsg[i] = " Error: E type address not on use chain; treated as I type.";
 				}
 			}
 
@@ -260,5 +257,7 @@ public class mylinker {
 			}
 		}
 		printresult(symbolTable, symboltableerror, memorymap, warninglist);
+		reader.close();
+		reader2.close();
 	}
 }
