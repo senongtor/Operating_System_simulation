@@ -1,5 +1,4 @@
-package imple;
-
+//A linker simulation
 import java.util.*;
 import java.io.*;
 
@@ -69,9 +68,7 @@ public class mylinker {
 		int totalspace = 0; // count the total number of addresses pairs we have
 		// first pass, handle multiple definition, calculate relative address,
 		// map symbols
-
-		// 改输入方式！！！！
-		String input = "/Users/senongtor/Documents/NYU_CS/OS/Lab1/input6.txt";
+		String input = args[0];
 		Scanner reader = new Scanner(new FileInputStream(input));
 
 		while (reader.hasNext()) {
@@ -196,7 +193,9 @@ public class mylinker {
 				Pair currpair = uselist2.get(i);
 				int init = currpair.getSecond();
 
-				// handle use address exceeding the size of addr list!!!!!!!!!
+				if(init>addrsize){
+					continue;
+				}
 
 				int absval = 0;
 				if (!symbolTable.containsKey(currpair.getFirst())) {
