@@ -602,11 +602,7 @@ public class ResourceManager {
 								resourceslist.get(curraction.resourcenum).unitsleft -= curraction.actionamount;
 								actiontable.get(i).removeFirst();
 							} else {
-								// if the request can not be accepted, then add the
-								// index of the task to
-								// deadrequestlist, increment the number of
-								// deadrequests.
-
+								// if the request can not be accepted, then block it,
 								// Add the indices of the blocked tasks so next time
 								// it will be checked first.
 								indexmap.add(i);
